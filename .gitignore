@@ -20,5 +20,4 @@
 .DS_Store
 testdata/*
 pdf/*
-dist/*
 .ftpxmltopdf.cfg
