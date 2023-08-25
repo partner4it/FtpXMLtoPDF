@@ -28,7 +28,7 @@ import (
 )
 
 //The module version
-const Version = "0.0.1"
+const Version = "0.0.2"
 const baseName = "ftpxmltopdf"
 
 //This key will be changed during build
@@ -330,6 +330,10 @@ func main() {
 		}
 		removeTempFile()
 		return
+	}
+
+	if config.FtpServer == "" || config.FtpUser == "" || config.FtpPassword == "" {
+		fatalln("Please ensure that ftpServer,ftpUser,ftpPassword are set ")
 	}
 
 	//Login
