@@ -215,7 +215,14 @@ func toPDF(htmlfile string, pdffile string) error {
 			chromedp.WaitVisible(`body`, chromedp.ByQuery),
 			// chromedp.Text(`h1`, &res, chromedp.NodeVisible, chromedp.ByQuery),
 			chromedp.ActionFunc(func(ctx context.Context) error {
-				buf, _, err := page.PrintToPDF().WithPrintBackground(true).Do(ctx)
+				buf, _, err := page.PrintToPDF().
+					WithDisplayHeaderFooter(true).
+					//WithMarginLeft(0).
+					//WithMarginRight(0).
+					//WithHeaderTemplate(`<div style="font-size:8px;width:100%;text-align:center;"><span class="title"></span> -- <span class="url"></span></div>`).
+					WithHeaderTemplate(`<div style="font-size:8px;width:100%;text-align:center;"></div>`).
+					WithFooterTemplate(`<div style="font-size:8px;width:100%;text-align:center;margin: 0mm 8mm 0mm 8mm;"><span style="float:left"><span class="title"></span> - <span >` + filepath.Base(pdffile) + `</span></span><span style="float:right">(<span class="pageNumber"></span> / <span class="totalPages"></span>)</span></div>`).
+					WithPrintBackground(true).Do(ctx)
 				if err != nil {
 					return err
 				}

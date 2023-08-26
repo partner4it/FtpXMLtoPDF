@@ -10,13 +10,20 @@
 
     <!-- The internal style sheet-->
     <style type="text/css">
+        html, body {
+            padding:0;
+            margin: 0;
+        }
         @page {
-        size: A4;
-        margin: 0;
+            size: A4;
+            margin: 10mm 0mm 10mm 0mm;
+            @bottom-left {
+                content: counter(page) ' of ' counter(pages);
+            }
         }
 
         @media print {
-            .page {
+          .page {
                 margin: 0;
                 border: initial;
                 border-radius: initial;
@@ -39,7 +46,6 @@
             border-collapse:collapse;
             border:none;
             height:11.9pt;
-            padding:0in 5.4pt 0in 5.4pt;
         }
         .mainHeader {
            border:solid #BFBFBF 1.0pt;
@@ -83,7 +89,7 @@
 </head>
 
 <body>
-<div class="page">
+  <div class="page">
     <!-- The two waterschap logo's-->
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 88" fill="currentColor" role="img"
         style="color:#0065BD;height:3em;float:left;;margin-left:5px">
