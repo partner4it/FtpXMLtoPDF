@@ -39,6 +39,9 @@ var BaseName = "ftpxmltopdf"
 //This key will be changed during build
 var SecretKey string = "N1PCdw3M2B1TfJhoaY2mL736p2vCUc47"
 
+//The default local configFile
+var configFile string = "." + BaseName + ".cfg"
+
 type ConfigSettings struct {
 	FtpServer   string `json:"ftpServer"`
 	FtpUser     string `json:"ftpUser"`
@@ -56,7 +59,7 @@ type RemoteConfig struct {
 }
 
 //The config
-var config = ConfigSettings{"", "", "", "", false, "*.xml", BaseName + ".tpl", "", "." + BaseName + ".tmp.html"}
+var config = ConfigSettings{"", "", "", "", false, "*.xml", BaseName + ".tpl.html", "", "." + BaseName + ".tmp.html"}
 var remoteConfig = RemoteConfig{}
 
 //Should we ignore faults
@@ -140,9 +143,10 @@ func fatalln(v ...any) {
 func Init() {
 	//Check if the is a config file with settings
 
-	if _, err := os.Stat("." + BaseName + ".cfg"); !os.IsNotExist(err) {
+	flag.StringVar(&configFile, "configFile", configFile, "The configFile to use.")
+	if _, err := os.Stat(configFile); !os.IsNotExist(err) {
 		//There is a config file read it
-		content, err := ioutil.ReadFile("." + BaseName + ".cfg")
+		content, err := ioutil.ReadFile(configFile)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -191,7 +195,7 @@ func Init() {
 		if err != nil {
 			fatalln(err)
 		}
-		err = ioutil.WriteFile("."+BaseName+".cfg", []byte(contentStr), 0644)
+		err = ioutil.WriteFile(configFile, []byte(contentStr), 0644)
 		if err != nil {
 			fatalln(err)
 		}
@@ -325,6 +329,7 @@ func fileNameWithoutExtTrimSuffix(fileName string) string {
 func main() {
 	Init()
 	log.Println(BaseName, "v"+Version+"-"+BuildVersion)
+	log.Println("Using configFile", configFile)
 	//Check if the temp file exists and we are not ignoring
 	if _, err := os.Stat(config.TempFile); !os.IsNotExist(err) {
 		if !ignoreFlag && !keepTemp {
@@ -405,9 +410,8 @@ func main() {
 	log.Println("Lockfile placed on ftpserver")
 
 	// Read the remoteConfig file if exist and not reset
-	var configFile string = "." + BaseName + ".cfg"
 	if !remoteReset {
-		cf, err := client.Download(configFile)
+		cf, err := client.Download(filepath.Base(configFile))
 		if err != nil {
 			if !errors.Is(err, os.ErrNotExist) {
 				fatalln(err)
@@ -423,7 +427,7 @@ func main() {
 				fatalln(err)
 			}
 		}
-		log.Println("Remote configfile read")
+		log.Println("Remote configfile read", filepath.Base(configFile))
 	}
 
 	// Scan ftpDir using the filter and limiting to greater than lastprocess
@@ -456,7 +460,7 @@ func main() {
 			if err != nil {
 				fatalln(err)
 			}
-			log.Println("Downloaded new file", remoteFile)
+			log.Println("Downloaded new xmlfile", remoteFile)
 			defer df.Close()
 			content, err := ioutil.ReadAll(df)
 			if err != nil {
@@ -471,7 +475,7 @@ func main() {
 			if err := convert(config.TempFile, config.OutputDir+fileNameWithoutExtTrimSuffix(remoteFile)+".pdf"); err != nil {
 				fatalln("Failed to convert file ("+remoteFile+")", err)
 			}
-			log.Println("Create PDF", config.OutputDir+fileNameWithoutExtTrimSuffix(remoteFile)+".pdf")
+			log.Println("Created PDF", config.OutputDir+fileNameWithoutExtTrimSuffix(remoteFile)+".pdf")
 		}
 	}
 	//Save the lastProcessed date
@@ -482,11 +486,11 @@ func main() {
 			fatalln(err)
 		}
 		// Write back the config file
-		err = client.UploadFile(configFile, strings.NewReader(string(content)))
+		err = client.UploadFile(filepath.Base(configFile), strings.NewReader(string(content)))
 		if err != nil {
 			fatalln(err)
 		}
-		log.Println("Remote configfile uploaded")
+		log.Println("Remote configfile uploaded", filepath.Base(configFile))
 		// Remove the temp file
 		if !keepTemp {
 			removeTempFile()
@@ -494,7 +498,7 @@ func main() {
 			log.Println("As requested is the tempfile not removed", config.TempFile)
 		}
 	} else {
-		log.Println("No new files to process")
+		log.Println("No new files found to process")
 	}
 
 	// Remove the lock file

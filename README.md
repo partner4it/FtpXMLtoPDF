@@ -1,18 +1,32 @@
 # FtpXMLtoPDF
-Download XML from FTP server and convert it to PDF using a template engine
+Download a XML file from a FTP(TLS) or SFTP(over SSH) server and convert it to PDF using a HTML template engine.
+
+## Using the tool
+You can download the native exceutable ``ftpxmltopdf`` using the [latest release](https://github.com/partner4it/FtpXMLtoPDF/releases/latest) archive and unziping it on you local system. This archive includes a demo template to inspire you.
+You can allways just clone the project and run it using ``go run main.go <parameters>``. 
+
+### First time usage
+The tool needs paramters, like servername,username,... to perform it task. To make te tool easy in use whe hav implemented an option to save these parameters in an encypted config file. This encrypted configfile can also be distributed to user so they will not see the security sensitive data. To update the information in the configfile run.
+``ftpxmltopdf -ftpServer=??? -ftpUser=??? -ftpPassword=??? ..... -save``
+
+Next time you want to run the same action using the saved config, just run ``ftpxmltopdf ``
+
+## Commandline options
+* **-save**  This options will save the current commandline values into an encrypted configfile. (defaults to **.ftpxmltopdf.cfg**)
+* **-configFile=** Specify witch configfile to use
+* **-ftpServer=** The ftp Server 
+* **-ftpUser=** The ftp User 
+* **-ftpPassword=** The ftp Password
+* **-ftpDir=** The ftp directory (defaults to *.*)
+* **-ftpTLS** Use a normal FTP server on port 21 with TLS support, instead of SFTP over SSH
+* **-tplName=** The template file to use for conversion (defaults to *ftpxmltopdf.tpl.html*)
+* **-outputDir=** The directory where endresults are stored
+* **-testFile=** Name of the local xml file to test template converversion (ftp server is)
+* **-tempFile** The name of the temporary html file to be used (defaults to *.ftpxmltopdf.tmp*)
+* **-keepTemp** Will keep the temporary html file
+* **-remoteReset** Will reset the remote configfile
 
 
-Testing the conversion of an xml file using a template can be done locally by running for example the command below.
-
-``
-go run main.go -testFile="testdata/2023081700045.xml" -tplName="templates/dso.tpl.html" -outputDir="testdata/pdf" -save 
-``
-
-Testing a file with the default or saved config and ignoring errors from last run
-
-``
-go run main.go -testFile="testdata/2023081700045.xml" -ignore 
-``
 
 ## Steps explained
 * Check if there is an unexpected last terminated run (**.ftpxmltopdf.tmp**). Using the **ignore flag** you can skip this check
@@ -28,23 +42,30 @@ go run main.go -testFile="testdata/2023081700045.xml" -ignore
 * Remove the **.ftpxmltopdf.lck** from the ftpserver and logout
 * Remove the **.ftpxmltopdf.tmp** file when **keepTemp flag** is not specified
 
+## Creating and testing a template
+Testing the conversion of an xml file is easy. By using a template and xmlfile locally. The template provide is a demonstation only and was intended for a water authority to use as a base translation of a DSO request. If you want to no more about the go html template options read the [documentation](https://pkg.go.dev/html/template). 
+
+Example testing a local template and xml file
+
+``
+ftpxmltopdf -testFile="testdata/2023081700045.xml" -tplName="templates/dso.tpl.html" -outputDir="testdata/pdf" -save 
+``
+
+or if have cloned the project
+
+``
+go run main.go -testFile="testdata/2023081700045.xml" -tplName="templates/dso.tpl.html" -outputDir="testdata/pdf" -save 
+``
+
+Testing a file with the default or saved config and ignoring errors from last run.
+
+``
+ftpxmltopdf -testFile="testdata/2023081700045.xml" -ignore 
+``
+
+
 ## Error handling
-The system will only exit after user confirmations in case of an error. All internal steps are logged in the *./tmp/ftpxmltopdf.log* 
-
-## Commandline options
-* *-save*  This options will save the current commandline values as defaults in encrypted file. (**.ftpxmltopdf.cfg**)
-* *-ftpServer=* The ftpServer 
-* *-ftpUser=* The ftpServer User 
-* *-ftpPassword=* The ftpServer Password
-* *-ftpDir=* The ftpServer directory (defaults to .)
-* *-ftpTLS* Use a normal FTP server on port 21 with TLS support
-* *-tplName=* The template file to use for conversion (defaults to ftpxmltopdf)
-* *-outputDir=* The directory where endresults are stored
-* *-testFile=* The xml test file to convert (ftp part wil be skipped)
-* *-tempFile The name of the tempfile to be used
-* *-keepTemp Will keep the temporary file
-* *-remoteReset Will reset the remote configfile
-
+All internal steps are logged to the console. On an error the user has to confirm that the error is read by hitting ***Enter***. When using the **-ignore** flag, no user confirmation is asked on an error.
 
 # Material used for inspration
 * [Sftp over SSH](https://www.inanzzz.com/index.php/post/tjp9/golang-sftp-client-server-example-to-upload-and-download-files-over-ssh-connection-streaming)
