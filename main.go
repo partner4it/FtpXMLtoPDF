@@ -324,9 +324,14 @@ func fileNameWithoutExtTrimSuffix(fileName string) string {
 
 func main() {
 	Init()
+	log.Println(BaseName, "v"+Version+"-"+BuildVersion)
 	//Check if the temp file exists and we are not ignoring
-	if _, err := os.Stat(config.TempFile); !os.IsNotExist(err) && !ignoreFlag {
-		fatalln("Looks like the last run was not successfull (" + config.TempFile + " exists)")
+	if _, err := os.Stat(config.TempFile); !os.IsNotExist(err) {
+		if !ignoreFlag && !keepTemp {
+			fatalln("Looks like the last run was not successfull (" + config.TempFile + " exists)")
+		} else {
+			log.Println("The local tempfile is still present, but is ignored")
+		}
 	}
 
 	//Check if output dir exists in not create it
@@ -347,6 +352,7 @@ func main() {
 
 	//Check if we should only do testing of converion
 	if testFile != "" {
+		log.Println("Using testfile", testFile)
 		//Run the conversion
 		if err := convert(testFile, config.OutputDir+fileNameWithoutExtTrimSuffix(testFile)+".pdf"); err != nil {
 			fatalln("Failed to convert file ("+testFile+")", err)
@@ -383,8 +389,12 @@ func main() {
 	}
 
 	// Check if there is a lock file in response, skip on ignore
-	if len(files) != 0 && !ignoreFlag {
-		fatalln("Lockfile (" + lockFile + ") found on ftpserver")
+	if len(files) != 0 {
+		if !ignoreFlag {
+			fatalln("Lockfile (" + lockFile + ") found on ftpserver")
+		} else {
+			log.Println("Lockfile found on remote server, but ignored")
+		}
 	}
 
 	// Write the lock file
@@ -392,6 +402,7 @@ func main() {
 	if err != nil {
 		fatalln(err)
 	}
+	log.Println("Lockfile placed on ftpserver")
 
 	// Read the remoteConfig file if exist and not reset
 	var configFile string = "." + BaseName + ".cfg"
@@ -412,6 +423,7 @@ func main() {
 				fatalln(err)
 			}
 		}
+		log.Println("Remote configfile read")
 	}
 
 	// Scan ftpDir using the filter and limiting to greater than lastprocess
@@ -444,6 +456,7 @@ func main() {
 			if err != nil {
 				fatalln(err)
 			}
+			log.Println("Downloaded new file", remoteFile)
 			defer df.Close()
 			content, err := ioutil.ReadAll(df)
 			if err != nil {
@@ -458,18 +471,30 @@ func main() {
 			if err := convert(config.TempFile, config.OutputDir+fileNameWithoutExtTrimSuffix(remoteFile)+".pdf"); err != nil {
 				fatalln("Failed to convert file ("+remoteFile+")", err)
 			}
+			log.Println("Create PDF", config.OutputDir+fileNameWithoutExtTrimSuffix(remoteFile)+".pdf")
 		}
 	}
 	//Save the lastProcessed date
-	remoteConfig.LastProcessed = lastProcessed
-	content, err := json.Marshal(remoteConfig)
-	if err != nil {
-		fatalln(err)
-	}
-	// Write back the config file
-	err = client.UploadFile(configFile, strings.NewReader(string(content)))
-	if err != nil {
-		fatalln(err)
+	if remoteConfig.LastProcessed != lastProcessed {
+		remoteConfig.LastProcessed = lastProcessed
+		content, err := json.Marshal(remoteConfig)
+		if err != nil {
+			fatalln(err)
+		}
+		// Write back the config file
+		err = client.UploadFile(configFile, strings.NewReader(string(content)))
+		if err != nil {
+			fatalln(err)
+		}
+		log.Println("Remote configfile uploaded")
+		// Remove the temp file
+		if !keepTemp {
+			removeTempFile()
+		} else {
+			log.Println("As requested is the tempfile not removed", config.TempFile)
+		}
+	} else {
+		log.Println("No new files to process")
 	}
 
 	// Remove the lock file
@@ -477,9 +502,6 @@ func main() {
 	if err != nil {
 		fatalln(err)
 	}
-	// Remove the temp file
-	if !keepTemp {
-		removeTempFile()
-	}
-
+	log.Println("Remote lockfile removed")
+	log.Println("Finished processing")
 }
