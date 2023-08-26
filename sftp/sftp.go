@@ -2,13 +2,19 @@
 package sftp
 
 import (
+	"bytes"
+	"crypto/tls"
+	"errors"
 	"fmt"
 	"io"
 	"net"
 	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/pkg/sftp"
+	"github.com/secsy/goftp"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -19,8 +25,8 @@ type Config struct {
 	PrivateKey   string
 	Server       string
 	KeyExchanges []string
-
-	Timeout time.Duration
+	TLS          bool
+	Timeout      time.Duration
 }
 
 // Client provides basic functionality to interact with a SFTP server.
@@ -28,6 +34,7 @@ type Client struct {
 	config     Config
 	sshClient  *ssh.Client
 	sftpClient *sftp.Client
+	ftpClient  *goftp.Client
 }
 
 // New initialises SSH and SFTP clients and returns Client type to use.
@@ -48,7 +55,9 @@ func (c *Client) Create(filePath string) (io.ReadWriteCloser, error) {
 	if err := c.connect(); err != nil {
 		return nil, fmt.Errorf("connect: %w", err)
 	}
-
+	if c.ftpClient != nil {
+		return nil, errors.New("Create not implemented")
+	}
 	return c.sftpClient.Create(filePath)
 }
 
@@ -56,6 +65,9 @@ func (c *Client) Create(filePath string) (io.ReadWriteCloser, error) {
 func (c *Client) Remove(path string) error {
 	if err := c.connect(); err != nil {
 		return fmt.Errorf("connect: %w", err)
+	}
+	if c.ftpClient != nil {
+		return c.ftpClient.Delete(path)
 	}
 	return c.sftpClient.Remove(path)
 }
@@ -66,13 +78,56 @@ func (c *Client) Glob(pattern string) (matches []string, err error) {
 	if err := c.connect(); err != nil {
 		return nil, fmt.Errorf("connect: %w", err)
 	}
+	if c.ftpClient != nil {
+		files, err := c.ftpClient.ReadDir(filepath.Dir(pattern))
+		if err != nil {
+			return nil, err
+		}
+		var matches = []string{}
+		for _, remoteFile := range files {
+			match, err := filepath.Match(pattern, filepath.Dir(pattern)+"/"+remoteFile.Name())
+			if err != nil {
+				return nil, err
+			}
+			if match {
+				matches = append(matches, filepath.Dir(pattern)+"/"+remoteFile.Name())
+			}
+		}
+		return matches, nil
+	}
 	return c.sftpClient.Glob(pattern)
+}
+
+func (c *Client) UploadFile(path string, source io.Reader) error {
+
+	if err := c.connect(); err != nil {
+		return fmt.Errorf("connect: %w", err)
+	}
+
+	if c.ftpClient != nil {
+		return c.ftpClient.Store(path, source)
+	}
+	// Write back the config file
+	destination, err := c.Create(path)
+	if err != nil {
+		return err
+	}
+	defer destination.Close()
+	// Upload the remoteconfig file to a remote location as in 1MB (byte) chunks.
+	if err := c.Upload(source, destination, 1000000); err != nil {
+		return err
+	}
+	return nil
 }
 
 // Upload writes local/source file data streams to remote/destination file.
 func (c *Client) Upload(source io.Reader, destination io.Writer, size int) error {
 	if err := c.connect(); err != nil {
 		return fmt.Errorf("connect: %w", err)
+	}
+
+	if c.ftpClient != nil {
+		return errors.New("Upload with writer not implemented")
 	}
 
 	chunk := make([]byte, size)
@@ -113,6 +168,24 @@ func (c *Client) Download(filePath string) (io.ReadCloser, error) {
 		return nil, fmt.Errorf("connect: %w", err)
 	}
 
+	if c.ftpClient != nil {
+		const fn = ".sftp.tmp"
+		tmp, err := os.Create(fn)
+		if err != nil {
+			return nil, err
+		}
+		err = c.ftpClient.Retrieve(filePath, tmp)
+		if err != nil {
+			if strings.Contains(err.Error(), "550-Failed to open file") {
+				err = os.ErrNotExist
+			}
+			return nil, err
+		}
+		buf, err := os.ReadFile(fn)
+		os.Remove(fn)
+		return io.NopCloser(bytes.NewBuffer(buf)), err
+	}
+
 	return c.sftpClient.Open(filePath)
 }
 
@@ -120,6 +193,10 @@ func (c *Client) Download(filePath string) (io.ReadCloser, error) {
 func (c *Client) Info(filePath string) (os.FileInfo, error) {
 	if err := c.connect(); err != nil {
 		return nil, fmt.Errorf("connect: %w", err)
+	}
+
+	if c.ftpClient != nil {
+		return c.ftpClient.Stat(filePath)
 	}
 
 	info, err := c.sftpClient.Lstat(filePath)
@@ -138,19 +215,46 @@ func (c *Client) Close() {
 	if c.sshClient != nil {
 		c.sshClient.Close()
 	}
+	if c.ftpClient != nil {
+		c.ftpClient.Close()
+	}
 }
 
 // connect initialises a new SSH and SFTP client only if they were not
 // initialised before at all and, they were initialised but the SSH
 // connection was lost for any reason.
 func (c *Client) connect() error {
+
+	//Check if we should use a tls connection
+	if c.config.TLS {
+		if c.ftpClient != nil {
+			return nil
+		}
+		var err error
+		// TLS client authentication
+		config := tls.Config{
+			InsecureSkipVerify: true,
+			ServerName:         c.config.Server,
+			ClientAuth:         tls.RequestClientCert,
+		}
+		cfg := goftp.Config{
+			User:      c.config.Username,
+			Password:  c.config.Password,
+			Timeout:   c.config.Timeout,
+			TLSConfig: &config,
+			TLSMode:   goftp.TLSExplicit, //TLSImplicit TLSExplicit
+		}
+		c.ftpClient, err = goftp.DialConfig(cfg, c.config.Server)
+		return err
+	}
+
+	//We use a SSH connection
 	if c.sshClient != nil {
 		_, _, err := c.sshClient.SendRequest("keepalive", false, nil)
 		if err == nil {
 			return nil
 		}
 	}
-
 	auth := ssh.Password(c.config.Password)
 	if c.config.PrivateKey != "" {
 		signer, err := ssh.ParsePrivateKey([]byte(c.config.PrivateKey))
@@ -171,18 +275,20 @@ func (c *Client) connect() error {
 			KeyExchanges: c.config.KeyExchanges,
 		},
 	}
-
-	sshClient, err := ssh.Dial("tcp", c.config.Server, cfg)
+	//We need port to connect
+	server := c.config.Server
+	if !strings.Contains(server, ":") {
+		server = server + ":22"
+	}
+	sshClient, err := ssh.Dial("tcp", server, cfg)
 	if err != nil {
 		return fmt.Errorf("ssh dial: %w", err)
 	}
 	c.sshClient = sshClient
-
 	sftpClient, err := sftp.NewClient(sshClient)
 	if err != nil {
 		return fmt.Errorf("sftp new client: %w", err)
 	}
 	c.sftpClient = sftpClient
-
 	return nil
 }

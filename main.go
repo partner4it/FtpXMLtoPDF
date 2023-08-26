@@ -27,9 +27,14 @@ import (
 	strip "github.com/grokify/html-strip-tags-go"
 )
 
-//The module version
-const Version = "0.0.2"
-const baseName = "ftpxmltopdf"
+//The module version, will be replaced during build
+var Version string = "code"
+
+//The build version, will be replaced during build
+var BuildVersion string = "local"
+
+//The base name of all default files used
+var BaseName = "ftpxmltopdf"
 
 //This key will be changed during build
 var SecretKey string = "N1PCdw3M2B1TfJhoaY2mL736p2vCUc47"
@@ -39,6 +44,7 @@ type ConfigSettings struct {
 	FtpUser     string `json:"ftpUser"`
 	FtpPassword string `json:"ftpPassword"`
 	FtpDir      string `json:"ftpDir"`
+	FtpTLS      bool   `json:"ftpTLS"`
 	FtpFilter   string `json:"ftpFilter"`
 	TplName     string `json:"tplName"`
 	OutputDir   string `json:"outputDir"`
@@ -50,7 +56,7 @@ type RemoteConfig struct {
 }
 
 //The config
-var config = ConfigSettings{"", "", "", ".", "*.xml", baseName + ".tpl", "", "." + baseName + ".tmp.html"}
+var config = ConfigSettings{"", "", "", "", false, "*.xml", BaseName + ".tpl", "", "." + BaseName + ".tmp.html"}
 var remoteConfig = RemoteConfig{}
 
 //Should we ignore faults
@@ -68,15 +74,15 @@ var saveFlag = false
 //Should we just run conversion test for template
 var testFile = ""
 
-func encrypt(plaintext string) string {
+func encrypt(plaintext string) (string, error) {
 	aes, err := aes.NewCipher([]byte(SecretKey[0:32]))
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 
 	gcm, err := cipher.NewGCM(aes)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 
 	// We need a 12-byte nonce for GCM (modifiable if you use cipher.NewGCMWithNonceSize())
@@ -84,7 +90,7 @@ func encrypt(plaintext string) string {
 	nonce := make([]byte, gcm.NonceSize())
 	_, err = rand.Read(nonce)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 
 	// ciphertext here is actually nonce+ciphertext
@@ -92,18 +98,18 @@ func encrypt(plaintext string) string {
 	// is enough to separate it from the ciphertext.
 	ciphertext := gcm.Seal(nonce, nonce, []byte(plaintext), nil)
 
-	return string(ciphertext)
+	return string(ciphertext), nil
 }
 
-func decrypt(ciphertext string) string {
+func decrypt(ciphertext string) (string, error) {
 	aes, err := aes.NewCipher([]byte(SecretKey[0:32]))
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 
 	gcm, err := cipher.NewGCM(aes)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 
 	// Since we know the ciphertext is actually nonce+ciphertext
@@ -113,10 +119,10 @@ func decrypt(ciphertext string) string {
 
 	plaintext, err := gcm.Open(nil, []byte(nonce), []byte(ciphertext), nil)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 
-	return string(plaintext)
+	return string(plaintext), nil
 }
 
 //fatalln error handing with user response
@@ -134,15 +140,21 @@ func fatalln(v ...any) {
 func Init() {
 	//Check if the is a config file with settings
 
-	if _, err := os.Stat("." + baseName + ".cfg"); !os.IsNotExist(err) {
+	if _, err := os.Stat("." + BaseName + ".cfg"); !os.IsNotExist(err) {
 		//There is a config file read it
-		content, err := ioutil.ReadFile("." + baseName + ".cfg")
+		content, err := ioutil.ReadFile("." + BaseName + ".cfg")
 		if err != nil {
 			log.Fatal(err)
 		}
-		err = json.Unmarshal([]byte(decrypt(string(content))), &config)
-		if err != nil {
-			log.Fatal(err)
+		contentstr, err := decrypt(string(content))
+		//Check if decrypt vaild
+		if err == nil {
+			err = json.Unmarshal([]byte(contentstr), &config)
+			if err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			log.Println("Config file invalid starting with default config")
 		}
 	}
 
@@ -152,6 +164,7 @@ func Init() {
 	flag.StringVar(&config.FtpUser, "ftpUser", config.FtpUser, "The User used during connecting to the ftpServer.")
 	flag.StringVar(&config.FtpPassword, "ftpPassword", config.FtpPassword, "The Password used during connecting to the ftpServer.")
 	flag.StringVar(&config.FtpDir, "ftpDir", config.FtpDir, "The Directory changed to on the ftpServer after valid login.")
+	flag.BoolVar(&config.FtpTLS, "ftpTLS", config.FtpTLS, "Should we use standard ftp with TLS")
 	flag.StringVar(&config.FtpFilter, "ftpFilter", config.FtpFilter, "The filter to select xml files")
 	flag.StringVar(&config.TplName, "tplName", config.TplName, "The name of the template to use during conversion.")
 	flag.StringVar(&config.OutputDir, "outputDir", config.OutputDir, "The location where pdf's are stored.")
@@ -164,7 +177,7 @@ func Init() {
 
 	flag.Parse() // after declaring flags we need to call it
 	if *version {
-		fmt.Println("Version ", Version)
+		fmt.Println("Version v"+Version, ", Build:", BuildVersion)
 		os.Exit(0)
 	}
 
@@ -174,10 +187,15 @@ func Init() {
 		if err != nil {
 			fatalln(err)
 		}
-		err = ioutil.WriteFile("."+baseName+".cfg", []byte(encrypt(string(content))), 0644)
+		contentStr, err := encrypt(string(content))
 		if err != nil {
 			fatalln(err)
 		}
+		err = ioutil.WriteFile("."+BaseName+".cfg", []byte(contentStr), 0644)
+		if err != nil {
+			fatalln(err)
+		}
+
 	}
 }
 
@@ -322,6 +340,11 @@ func main() {
 		config.OutputDir = config.OutputDir + "/"
 	}
 
+	//Check if ftpdir is set, add slash
+	if config.FtpDir != "" {
+		config.FtpDir = config.FtpDir + "/"
+	}
+
 	//Check if we should only do testing of converion
 	if testFile != "" {
 		//Run the conversion
@@ -343,6 +366,7 @@ func main() {
 		//PrivateKey:   string(pk), // required only if private key authentication is to be used
 		Server: config.FtpServer,
 		//KeyExchanges: []string{"diffie-hellman-group-exchange-sha256", "diffie-hellman-group14-sha256"}, // optional
+		TLS:     config.FtpTLS,    //Should we use FTP with TLS instead of SSH
 		Timeout: time.Second * 30, // 0 for not timeout
 	}
 	client, err := sftp.New(ftpconfig)
@@ -351,7 +375,7 @@ func main() {
 	}
 	defer client.Close()
 
-	var lockFile string = "." + baseName + ".lck"
+	var lockFile string = "." + BaseName + ".lck"
 	//Search lockfile on ftpserver
 	files, err := client.Glob(lockFile)
 	if err != nil {
@@ -362,15 +386,15 @@ func main() {
 	if len(files) != 0 && !ignoreFlag {
 		fatalln("Lockfile (" + lockFile + ") found on ftpserver")
 	}
+
 	// Write the lock file
-	lf, err := client.Create(lockFile)
+	err = client.UploadFile(lockFile, strings.NewReader(string("lock")))
 	if err != nil {
 		fatalln(err)
 	}
-	lf.Close()
 
 	// Read the remoteConfig file if exist and not reset
-	var configFile string = "." + baseName + ".cfg"
+	var configFile string = "." + BaseName + ".cfg"
 	if !remoteReset {
 		cf, err := client.Download(configFile)
 		if err != nil {
@@ -391,7 +415,7 @@ func main() {
 	}
 
 	// Scan ftpDir using the filter and limiting to greater than lastprocess
-	files, err = client.Glob(config.FtpFilter)
+	files, err = client.Glob(config.FtpDir + config.FtpFilter)
 	if err != nil {
 		fatalln(err)
 	}
@@ -443,15 +467,8 @@ func main() {
 		fatalln(err)
 	}
 	// Write back the config file
-	destination, err := client.Create(configFile)
+	err = client.UploadFile(configFile, strings.NewReader(string(content)))
 	if err != nil {
-		fatalln(err)
-	}
-	defer destination.Close()
-	source := strings.NewReader(string(content))
-
-	// Upload the remoteconfig file to a remote location as in 1MB (byte) chunks.
-	if err := client.Upload(source, destination, 1000000); err != nil {
 		fatalln(err)
 	}
 
