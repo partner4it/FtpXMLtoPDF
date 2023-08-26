@@ -3,7 +3,7 @@ Download a XML file from a FTP(TLS) or SFTP(over SSH) server and convert it to P
 
 ## Using the tool
 You can download the native exceutable ``ftpxmltopdf`` using the [latest release](https://github.com/partner4it/FtpXMLtoPDF/releases/latest) archive and unziping it on you local system. This archive includes a demo template to inspire you.
-You can allways just clone the project and run it using ``go run main.go <parameters>``. 
+You can allways just clone the project and run it using ``go run . <parameters>``. 
 
 ### First time usage
 The tool needs paramters, like servername,username,... to perform it task. To make te tool easy in use whe hav implemented an option to save these parameters in an encypted config file. This encrypted configfile can also be distributed to user so they will not see the security sensitive data. To update the information in the configfile run.
@@ -19,13 +19,13 @@ Next time you want to run the same action using the saved config, just run ``ftp
 * **-ftpPassword=** The ftp Password
 * **-ftpDir=** The ftp directory (defaults to *.*)
 * **-ftpTLS** Use a normal FTP server on port 21 with TLS support, instead of SFTP over SSH
+* **-ftpRemove** When set we will remove the remote file on successfull processing
 * **-tplName=** The template file to use for conversion (defaults to *ftpxmltopdf.tpl.html*)
 * **-outputDir=** The directory where endresults are stored
 * **-testFile=** Name of the local xml file to test template converversion (ftp server is)
 * **-tempFile** The name of the temporary html file to be used (defaults to *.ftpxmltopdf.tmp*)
 * **-keepTemp** Will keep the temporary html file
 * **-remoteReset** Will reset the remote configfile
-
 
 
 ## Steps explained
@@ -54,7 +54,7 @@ ftpxmltopdf -testFile="testdata/2023081700045.xml" -tplName="templates/dso.tpl.h
 or if have cloned the project
 
 ``
-go run main.go -testFile="testdata/2023081700045.xml" -tplName="templates/dso.tpl.html" -outputDir="testdata/pdf" -save 
+go run . -testFile="testdata/2023081700045.xml" -tplName="templates/dso.tpl.html" -outputDir="testdata/pdf" -save 
 ``
 
 Testing a file with the default or saved config and ignoring errors from last run.
