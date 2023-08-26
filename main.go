@@ -164,7 +164,7 @@ func Init() {
 	flag.StringVar(&config.FtpUser, "ftpUser", config.FtpUser, "The User used during connecting to the ftpServer.")
 	flag.StringVar(&config.FtpPassword, "ftpPassword", config.FtpPassword, "The Password used during connecting to the ftpServer.")
 	flag.StringVar(&config.FtpDir, "ftpDir", config.FtpDir, "The Directory changed to on the ftpServer after valid login.")
-	flag.BoolVar(&config.FtpTLS, "ftpTLS", config.FtpTLS, "Should we use standard ftp with TLS")
+	flag.BoolVar(&config.FtpTLS, "ftpTLS", config.FtpTLS, "Should we use standard ftp server with TLS")
 	flag.StringVar(&config.FtpFilter, "ftpFilter", config.FtpFilter, "The filter to select xml files")
 	flag.StringVar(&config.TplName, "tplName", config.TplName, "The name of the template to use during conversion.")
 	flag.StringVar(&config.OutputDir, "outputDir", config.OutputDir, "The location where pdf's are stored.")

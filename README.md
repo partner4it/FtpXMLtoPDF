@@ -37,6 +37,7 @@ The system will only exit after user confirmations in case of an error. All inte
 * *-ftpUser=* The ftpServer User 
 * *-ftpPassword=* The ftpServer Password
 * *-ftpDir=* The ftpServer directory (defaults to .)
+* *-ftpTLS* Use a normal FTP server on port 21 with TLS support
 * *-tplName=* The template file to use for conversion (defaults to ftpxmltopdf)
 * *-outputDir=* The directory where endresults are stored
 * *-testFile=* The xml test file to convert (ftp part wil be skipped)
