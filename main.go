@@ -60,6 +60,9 @@ func main() {
 		config.FtpDir = config.FtpDir + "/"
 	}
 
+	//Set the browser path
+	template.BrowserPath = config.BrowserPath
+
 	//Check if we should only do testing of converion
 	if localFile != "" {
 		log.Println("Using localFile", localFile)

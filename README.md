@@ -28,6 +28,7 @@ Next time you want to run the same action using the saved config, just run ``ftp
 * **-remoteReset** Will reset the remote configfile
 * **-logFile=** When set this file is used for logging instead of console 
 * **-silent** When set and logfile is empty we will not show any logging
+* **-browser=** Set the path to the chrome browser
 
 
 ## Steps explained

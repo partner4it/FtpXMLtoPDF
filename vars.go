@@ -26,6 +26,7 @@ type ConfigSettings struct {
 	TplName     string `json:"tplName"`
 	OutputDir   string `json:"outputDir"`
 	TempFile    string `json:"tempFile"`
+	BrowserPath string `json:"browserPath"`
 }
 
 //Struct definition of the remote configfile
@@ -35,7 +36,7 @@ type RemoteConfig struct {
 
 //The local config
 var config = ConfigSettings{"", "", "", "", false, "*.xml", false,
-	BaseName + ".tpl.html", "", "." + BaseName + ".tmp.html"}
+	BaseName + ".tpl.html", "", "." + BaseName + ".tmp.html", ""}
 
 //The remote config
 var remoteConfig = RemoteConfig{}
@@ -119,6 +120,7 @@ func initVars() {
 	flag.BoolVar(&keepTemp, "keepTemp", keepTemp, "When set we will keep the tempfile")
 	flag.BoolVar(&remoteReset, "remoteReset", remoteReset, "Should we do a remote reset of the configfile")
 	flag.BoolVar(&silent, "silent", silent, "When set en logFile is empty we will not show any logging")
+	flag.StringVar(&config.BrowserPath, "browser", config.BrowserPath, "The full path to the chrome exceutalbe")
 
 	flag.Parse() // after declaring flags we need to call it
 	if *version {
