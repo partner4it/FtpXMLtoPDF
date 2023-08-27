@@ -74,10 +74,13 @@ var pipeMode = false
 var logFile = ""
 var silent = false //When set en logfile is empty we will not show any logging
 
+var SecretKey string = "N1PCdw3M2B1TfJhoaY2mL736p2vCUc47"
+
 //Read os flags and setup log file
 func initVars() {
+	//Overwrite the SecretKey used within Secure
+	secure.SecretKey = SecretKey
 	//Check if the is a config file with settings
-
 	flag.StringVar(&configFile, "configFile", configFile, "The configFile to use.")
 	if _, err := os.Stat(configFile); !os.IsNotExist(err) {
 		//There is a config file read it
