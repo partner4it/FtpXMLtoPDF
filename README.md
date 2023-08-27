@@ -76,7 +76,7 @@ Installation on windows can be sometimes a little bit more tricky. If you follow
 1. Open the command line by typing `cmd` in the search field, and clik the application shown or just hit enter.
 2. You will now in the home directory of your personal settings on your pc. Type `mkdir ftpxmltopdf` to create an new direcotry. 
 3. Change into the newly created directory by typing `cd ftpxmltopdf`
-4. Now you can download the executable by `curl -O -L https://github.com/partner4it/FtpXMLtoPDF/releases/download/v0.0.5/ftpxmltopdf.exe-windows-amd64.gz`
+4. Now you can download the executable by `curl -O -L https://github.com/partner4it/FtpXMLtoPDF/releases/download/v0.0.6/ftpxmltopdf.exe-windows-amd64.gz`
 5. Now you can extract the binary by typing `tar -xjf ftpxmltopdf.exe-windows-amd64.gz .`
 6. Remove te downloaded archive by typing `del ftpxmltopdf.exe-windows-amd64.gz`
 7. By typing `cd ftpxmltopdf` you will enter the directory of the executable
