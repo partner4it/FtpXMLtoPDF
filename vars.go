@@ -27,6 +27,7 @@ type ConfigSettings struct {
 	OutputDir   string `json:"outputDir"`
 	TempFile    string `json:"tempFile"`
 	BrowserPath string `json:"browserPath"`
+	LogFile     string `json:"logFile"`
 }
 
 //Struct definition of the remote configfile
@@ -36,7 +37,7 @@ type RemoteConfig struct {
 
 //The local config
 var config = ConfigSettings{"", "", "", "", false, "*.xml", false,
-	BaseName + ".tpl.html", "", "." + BaseName + ".tmp.html", ""}
+	BaseName + ".tpl.html", "", "." + BaseName + ".tmp.html", "", ""}
 
 //The remote config
 var remoteConfig = RemoteConfig{}
@@ -72,7 +73,6 @@ var localFile = ""
 var pipeMode = false
 
 //The name of the log file to use
-var logFile = ""
 var silent = false //When set en logfile is empty we will not show any logging
 
 var SecretKey string = "N1PCdw3M2B1TfJhoaY2mL736p2vCUc47"
@@ -114,7 +114,7 @@ func initVars() {
 	flag.StringVar(&config.OutputDir, "outputDir", config.OutputDir, "The location where pdf's are stored.")
 	flag.StringVar(&config.TempFile, "tempFile", config.TempFile, "The filename and location of temp file.")
 	flag.StringVar(&localFile, "localFile", localFile, "The location of the local xml file to convert to pdf's.")
-	flag.StringVar(&logFile, "logFile", logFile, "The name of the log file to use instead of console")
+	flag.StringVar(&config.LogFile, "logFile", config.LogFile, "The name of the log file to use instead of console")
 	flag.BoolVar(&saveFlag, "save", saveFlag, "Should we save to the encypted logfile")
 	flag.BoolVar(&ignoreFlag, "ignore", ignoreFlag, "When set faults will be ignored")
 	flag.BoolVar(&keepTemp, "keepTemp", keepTemp, "When set we will keep the tempfile")
@@ -155,11 +155,11 @@ func initVars() {
 	}
 
 	//Check if we should write log logfile instead of console
-	if logFile == "" && (silent || pipeMode) {
-		logFile = "/dev/null"
+	if config.LogFile == "" && (silent || pipeMode) {
+		config.LogFile = "/dev/null"
 	}
-	if logFile != "" {
-		f, err := os.OpenFile(BaseName+".log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if config.LogFile != "" {
+		f, err := os.OpenFile(config.LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 		if err != nil {
 			log.Fatalf("error opening logfile: %v", err)
 		}
