@@ -33,7 +33,7 @@ do
 		output_name+='.exe'
 	fi	
 
-	env GOOS=$GOOS GOARCH=$GOARCH go build -ldflags="-X 'main.SecretKey=$BUILD_KEY' -X 'main.BuildVersion=$GIT_BUILD' -X 'main.Version=$BUILD_VERSION' -X 'main.BaseName=$package'"  -o $output_name $package
+	env GOOS=$GOOS GOARCH=$GOARCH go build -ldflags="-X 'secure.SecretKey=$BUILD_KEY' -X 'main.BuildVersion=$GIT_BUILD' -X 'main.Version=$BUILD_VERSION' -X 'main.BaseName=$package'"  -o $output_name $package
 	if [ $? -ne 0 ]; then
    		echo 'An error has occurred! Aborting the script execution...'
 		exit 1

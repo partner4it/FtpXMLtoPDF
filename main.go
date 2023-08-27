@@ -3,9 +3,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"flag"
-	"fmt"
-	"ftpxmltopdf/sftp"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -13,174 +11,18 @@ import (
 	"strings"
 	"time"
 
-	xmlToJson "github.com/basgys/goxml2json"
+	"github.com/partner4it/sftp"
+	"github.com/partner4it/template"
 )
 
-//The module version, will be replaced during build
-var Version string = "code"
-
-//The build version, will be replaced during build
-var BuildVersion string = "local"
-
-//The base name of all default files used
-var BaseName = "ftpxmltopdf"
-
-//This key will be changed during build
-var SecretKey string = "N1PCdw3M2B1TfJhoaY2mL736p2vCUc47"
-
-//The default local configFile
-var configFile string = "." + BaseName + ".cfg"
-
-type ConfigSettings struct {
-	FtpServer   string `json:"ftpServer"`
-	FtpUser     string `json:"ftpUser"`
-	FtpPassword string `json:"ftpPassword"`
-	FtpDir      string `json:"ftpDir"`
-	FtpTLS      bool   `json:"ftpTLS"`
-	FtpFilter   string `json:"ftpFilter"`
-	FtpRemove   bool   `json:"ftpRemove"`
-	TplName     string `json:"tplName"`
-	OutputDir   string `json:"outputDir"`
-	TempFile    string `json:"tempFile"`
-}
-
-type RemoteConfig struct {
-	LastProcessed time.Time `json:"lastProcessed"`
-}
-
-//The config
-var config = ConfigSettings{"", "", "", "", false, "*.xml", false, BaseName + ".tpl.html", "", "." + BaseName + ".tmp.html"}
-var remoteConfig = RemoteConfig{}
-
-//Should we ignore faults
-var ignoreFlag = false
-
-//Should we keep the temp file
-var keepTemp = false
-
-//Should we do a remote reset of the config file
-var remoteReset = false
-
-//Should we save the settings
-var saveFlag = false
-
-//Should we just run conversion test for template
-var testFile = ""
-
-//Read os flags
-func Init() {
-	//Check if the is a config file with settings
-
-	flag.StringVar(&configFile, "configFile", configFile, "The configFile to use.")
-	if _, err := os.Stat(configFile); !os.IsNotExist(err) {
-		//There is a config file read it
-		content, err := ioutil.ReadFile(configFile)
-		if err != nil {
-			log.Fatal(err)
-		}
-		contentstr, err := decrypt(string(content))
-		//Check if decrypt vaild
-		if err == nil {
-			err = json.Unmarshal([]byte(contentstr), &config)
-			if err != nil {
-				log.Fatal(err)
-			}
-		} else {
-			log.Println("Config file invalid starting with default config")
-		}
-	}
-
-	// flags declaration using flag package
-	version := flag.Bool("version", false, "prints current version ("+Version+")")
-	flag.StringVar(&config.FtpServer, "ftpServer", config.FtpServer, "The ftpServer to connect to.")
-	flag.StringVar(&config.FtpUser, "ftpUser", config.FtpUser, "The User used during connecting to the ftpServer.")
-	flag.StringVar(&config.FtpPassword, "ftpPassword", config.FtpPassword, "The Password used during connecting to the ftpServer.")
-	flag.StringVar(&config.FtpDir, "ftpDir", config.FtpDir, "The Directory changed to on the ftpServer after valid login.")
-	flag.BoolVar(&config.FtpTLS, "ftpTLS", config.FtpTLS, "Should we use standard ftp server with TLS")
-	flag.BoolVar(&config.FtpRemove, "ftpRemove", config.FtpRemove, "Should we remove file after succesfull processing")
-	flag.StringVar(&config.FtpFilter, "ftpFilter", config.FtpFilter, "The filter to select xml files")
-	flag.StringVar(&config.TplName, "tplName", config.TplName, "The name of the template to use during conversion.")
-	flag.StringVar(&config.OutputDir, "outputDir", config.OutputDir, "The location where pdf's are stored.")
-	flag.StringVar(&config.TempFile, "tempFile", config.TempFile, "The filename and location of temp file.")
-	flag.StringVar(&testFile, "testFile", testFile, "The location of the xml test file to convert to pdf's.")
-	flag.BoolVar(&saveFlag, "save", saveFlag, "Should we save to the encypted logfile")
-	flag.BoolVar(&ignoreFlag, "ignore", ignoreFlag, "When set faults will be ignored")
-	flag.BoolVar(&keepTemp, "keepTemp", keepTemp, "When set we will keep the tempfile")
-	flag.BoolVar(&remoteReset, "remoteReset", remoteReset, "Should we do a remote reset of the configfile")
-
-	flag.Parse() // after declaring flags we need to call it
-	if *version {
-		fmt.Println("Version v"+Version, ", Build:", BuildVersion)
-		os.Exit(0)
-	}
-
-	//Save the config file
-	if saveFlag {
-		content, err := json.Marshal(config)
-		if err != nil {
-			fatalln(err)
-		}
-		contentStr, err := encrypt(string(content))
-		if err != nil {
-			fatalln(err)
-		}
-		err = ioutil.WriteFile(configFile, []byte(contentStr), 0644)
-		if err != nil {
-			fatalln(err)
-		}
-
-	}
-}
-
-func convert(fileIn string, fileOut string) error {
-	xml, err := os.ReadFile(fileIn)
-	if err != nil {
-		return err
-	}
-	// Convert the xml to Json
-	json, err := xmlToJson.Convert(strings.NewReader(string(xml)))
-	if err != nil {
-		return err
-	}
-
-	// Make for the bytebuffer a string and run it through the template
-	jsonString := json.String()
-	content, err := toTemplate(config.TplName, &jsonString)
-	if err != nil {
-		return err
-	}
-
-	//Save the content to the tempfile
-	if err = ioutil.WriteFile(config.TempFile, []byte(content), 0644); err != nil {
-		return err
-	}
-
-	// Convert the tempfile to outputfile pdf
-	path, err := os.Getwd()
-	if err != nil {
-		return err
-	}
-	if err = toPDF(path+"/"+config.TempFile, fileOut); err != nil {
-		return err
-	}
-	return nil
-}
-
-//Remove the tempfile if exists
-func removeTempFile() {
-	if _, err := os.Stat(config.TempFile); !os.IsNotExist(err) {
-		err = os.Remove(config.TempFile)
-		if err != nil {
-			fatalln("Failed removing temp file (" + config.TempFile + ")")
-		}
-	}
-}
-
 func main() {
-	Init()
+	initVars()
+
+	//Print some log information, like version, build and configfile used
 	log.Println(BaseName, "v"+Version+"-"+BuildVersion)
 	log.Println("Using configFile", configFile)
-	//Check if the temp file exists and we are not ignoring
+
+	//Check if the tempfile exists and we are not ignoring
 	if _, err := os.Stat(config.TempFile); !os.IsNotExist(err) {
 		if !ignoreFlag && !keepTemp {
 			fatalln("Looks like the last run was not successfull (" + config.TempFile + " exists)")
@@ -206,13 +48,44 @@ func main() {
 	}
 
 	//Check if we should only do testing of converion
-	if testFile != "" {
-		log.Println("Using testfile", testFile)
+	if localFile != "" {
+		log.Println("Using localFile", localFile)
 		//Run the conversion
-		if err := convert(testFile, config.OutputDir+fileNameWithoutExtTrimSuffix(testFile)+".pdf"); err != nil {
-			fatalln("Failed to convert file ("+testFile+")", err)
+		if err := template.XMLtoPDF(localFile, config.OutputDir+fileNameWithoutExt(localFile)+".pdf",
+			config.TplName, config.TempFile); err != nil {
+			fatalln("Failed to convert file ("+localFile+")", err)
 		}
 		removeTempFile()
+		return
+	}
+
+	//In pipeMode we receive xml from stdin and write it ot stdout
+	if pipeMode {
+		log.Println("Using pipeMode")
+		//Read the pipedata
+		stdin, err := io.ReadAll(os.Stdin)
+		if err != nil {
+			fatalln(err)
+		}
+		var pipeFile = "." + BaseName + ".pip"
+		if err = ioutil.WriteFile(pipeFile, stdin, 0644); err != nil {
+			fatalln(err)
+		}
+
+		//Run the conversion
+		if err := template.XMLtoPDF(pipeFile, pipeFile,
+			config.TplName, config.TempFile); err != nil {
+			fatalln("Failed to convert file ("+localFile+")", err)
+		}
+		removeTempFile()
+		//Dump the PDF to the console
+		pdf, err := ioutil.ReadFile(pipeFile)
+		if err != nil {
+			fatalln(err)
+		}
+		os.Stdout.Write(pdf)
+		//Remove the PDF
+		removeFile(pipeFile)
 		return
 	}
 
@@ -290,8 +163,7 @@ func main() {
 		return
 	}
 
-	// Create output location if not exits
-	// For each file
+	// For each remote filename
 	lastProcessed := remoteConfig.LastProcessed
 	for _, remoteFile := range files {
 		// Get remote file stats to check if it should be processed
@@ -322,10 +194,11 @@ func main() {
 			}
 
 			//Run the conversion on the tempfile
-			if err := convert(config.TempFile, config.OutputDir+fileNameWithoutExtTrimSuffix(remoteFile)+".pdf"); err != nil {
+			if err := template.XMLtoPDF(config.TempFile, config.OutputDir+fileNameWithoutExt(remoteFile)+".pdf",
+				config.TplName, config.TempFile); err != nil {
 				fatalln("Failed to convert file ("+remoteFile+")", err)
 			}
-			log.Println("Created PDF", config.OutputDir+fileNameWithoutExtTrimSuffix(remoteFile)+".pdf")
+			log.Println("Created PDF", config.OutputDir+fileNameWithoutExt(remoteFile)+".pdf")
 			//Check if we should remove file
 			if config.FtpRemove {
 				err = client.Remove(remoteFile)

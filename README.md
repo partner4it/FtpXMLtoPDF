@@ -22,10 +22,12 @@ Next time you want to run the same action using the saved config, just run ``ftp
 * **-ftpRemove** When set we will remove the remote file on successfull processing
 * **-tplName=** The template file to use for conversion (defaults to *ftpxmltopdf.tpl.html*)
 * **-outputDir=** The directory where endresults are stored
-* **-testFile=** Name of the local xml file to test template converversion (ftp server is)
+* **-localFile=** Name of the local test xmlfile to test template converversion (ftp server is)
 * **-tempFile** The name of the temporary html file to be used (defaults to *.ftpxmltopdf.tmp*)
 * **-keepTemp** Will keep the temporary html file
 * **-remoteReset** Will reset the remote configfile
+* **-logFile=** When set this file is used for logging instead of console 
+* **-silent** When set and logfile is empty we will not show any logging
 
 
 ## Steps explained
@@ -48,24 +50,20 @@ Testing the conversion of an xml file is easy. By using a template and xmlfile l
 Example testing a local template and xml file
 
 ``
-ftpxmltopdf -testFile="testdata/2023081700045.xml" -tplName="templates/dso.tpl.html" -outputDir="testdata/pdf" -save 
+ftpxmltopdf -localFile="testdata/2023081700045.xml" -tplName="templates/dso.tpl.html" -outputDir="testdata/pdf" -save 
 ``
 
 or if have cloned the project
 
 ``
-go run . -testFile="testdata/2023081700045.xml" -tplName="templates/dso.tpl.html" -outputDir="testdata/pdf" -save 
+go run . -localFile="testdata/2023081700045.xml" -tplName="templates/dso.tpl.html" -outputDir="testdata/pdf" -save 
 ``
 
 Testing a file with the default or saved config and ignoring errors from last run.
 
 ``
-ftpxmltopdf -testFile="testdata/2023081700045.xml" -ignore 
+ftpxmltopdf -localFile="testdata/2023081700045.xml" -ignore 
 ``
-
 
 ## Error handling
 All internal steps are logged to the console. On an error the user has to confirm that the error is read by hitting ***Enter***. When using the **-ignore** flag, no user confirmation is asked on an error.
-
-# Material used for inspration
-* [Sftp over SSH](https://www.inanzzz.com/index.php/post/tjp9/golang-sftp-client-server-example-to-upload-and-download-files-over-ssh-connection-streaming)
