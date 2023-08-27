@@ -25,7 +25,7 @@ require (
 	github.com/chromedp/sysutil v1.0.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
-	github.com/partner4it/sftp v0.0.1
+	github.com/partner4it/sftp v0.0.2
 	github.com/partner4it/template v0.0.4
 	github.com/pkg/sftp v1.13.6
 	github.com/secsy/goftp v0.0.0-20200609142545-aa2de14babf4

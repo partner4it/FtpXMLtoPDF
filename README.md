@@ -68,3 +68,24 @@ ftpxmltopdf -localFile="testdata/2023081700045.xml" -ignore
 
 ## Error handling
 All internal steps are logged to the console. On an error the user has to confirm that the error is read by hitting ***Enter***. When using the **-ignore** flag, no user confirmation is asked on an error.
+
+
+# Installing on  Windows
+Installation on windows can be sometimes a little bit more tricky. If you follow the following steps it should be fine.
+
+1. Open the command line by typing `cmd` in the search field, and clik the application shown.
+2. You will now in the home directory of your personal settings on your pc. Type `mkdir MyApps` to create an new direcotry. 
+3. Change into the newly created directory by typing `cd MyApp`
+4. Now you can download the executable by `curl https://github.com/partner4it/FtpXMLtoPDF/releases/download/latest/ftpxmltopdf.exe-windows-amd64.gz`
+5. Now you can extract the binary by typing `tar -xvf ftpxmltopdf.exe-windows-amd64.gz .`
+6. Remove te downloaded archive by typing `del ftpxmltopdf.exe-windows-amd64.gz`
+7. By typing `cd ftpxmltopdf` you will enter the directory of the executable
+8. On first time use, you should configure the default options and save them. Type the following command and change the questionmarks with the correct value. `ftpxmltopdf -ftpTLS -ftpServer="?" -ftpUser="?" -ftpPassword="?" -outputDir=pdf -tplName="templates/dso.tpl.html" -ignore -save`
+9. On secondtime usage you can now just type `ftpxmltopdf` to do a next run. If you had and error check the step above and correct the problem. To run you can also use the file explorer, move to `c:/users/<yourname>/MyApps/ftpxmltopdf` and doubelclick `ftpxmltopdf` 
+10. After processing a valid xml, there will be pdf's in de `pdf` directory. 
+
+### Copy config file if needed
+It is also possible the you copy a configfile provided into this directory. Preventing the spreading the secret information. The file is called `.ftpxmltopdf.cfg`
+
+### Chrome Problem
+Sometimes the system complains that chrome is not install. Then just downloaded using the browser. If it complains it cannot install globally just decline and afterwards accept the question to install it locally.

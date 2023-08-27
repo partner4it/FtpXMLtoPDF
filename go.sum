@@ -31,6 +31,8 @@ github.com/partner4it/secure v0.0.2 h1:zGPRmE1VkpzFoncet3Jzemm2rDH6H/8dFSMkIBnt+
 github.com/partner4it/secure v0.0.2/go.mod h1:06iOvJkmwEvrIp/gPez4E9xJwBVdJ1nEJukpC2aimy0=
 github.com/partner4it/sftp v0.0.1 h1:yNyxG/JcO6NmSrBYjwVj4iB81Lc+DnDFDaFpRidjPtY=
 github.com/partner4it/sftp v0.0.1/go.mod h1:d5WPYhaZKVOBnm7hY0aZX582LVcmpleoW4I6n6TIYpU=
+github.com/partner4it/sftp v0.0.2 h1:qRa6G70d6LDi2BWnFuY/0vAvHDIgylHIpYhLdpXP5PA=
+github.com/partner4it/sftp v0.0.2/go.mod h1:d5WPYhaZKVOBnm7hY0aZX582LVcmpleoW4I6n6TIYpU=
 github.com/partner4it/template v0.0.1 h1:CWpNeopYmHM8tXR5WHSv9hE2uZ2BH/C3VR0rw+94tqA=
 github.com/partner4it/template v0.0.1/go.mod h1:PyNy1JKFBz4w489tj3eF6EOF124TyN+OdwopygGc7VM=
 github.com/partner4it/template v0.0.2 h1:ppBhUDUbcCSbh8PZmbhgPLytSwX/XYAjrM3J9UGjtC4=

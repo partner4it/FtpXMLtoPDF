@@ -38,7 +38,8 @@ func main() {
 	//Check if the tempfile exists and we are not ignoring
 	if _, err := os.Stat(config.TempFile); !os.IsNotExist(err) {
 		if !ignoreFlag && !keepTemp {
-			fatalln("Looks like the last run was not successfull (" + config.TempFile + " exists)")
+			removeTempFile() //For next time remove the temp file
+			fatalln("Looks like the last run was not successfull (" + config.TempFile + " exists). Cleared now")
 		} else {
 			log.Println("The local tempfile is still present, but is ignored")
 		}
