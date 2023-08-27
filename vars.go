@@ -163,7 +163,6 @@ func initVars() {
 		if err != nil {
 			log.Fatalf("error opening logfile: %v", err)
 		}
-		defer f.Close()
 
 		log.SetOutput(f)
 	}
