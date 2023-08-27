@@ -175,8 +175,9 @@
         <tr >
             <td colspan=1 class="element">Activiteit:</td>
             <td colspan=2 class="result">{{$verzoek.projectactiviteiten.projectactiviteit.activiteitnaam}}</td>
-            <td colspan=1 class="element">VolgNr:</td>
-            <td colspan=2 class="result">{{$verzoek.projectactiviteiten.projectactiviteit.volgnummer}}</td>
+            <td colspan=1 class="element">VolgNr: Datum:</td>
+            <td colspan=1 class="result">{{$verzoek.projectactiviteiten.projectactiviteit.volgnummer}}</td>
+            <td colspan=1 class="result">{{ (toTime $verzoek.indienDatum).Format "02 Jan 2006" }}</td>
         </tr>
         <tr >
             <td colspan="6" class="spacer" >&nbsp;</td>

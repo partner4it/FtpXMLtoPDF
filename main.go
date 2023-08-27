@@ -11,12 +11,25 @@ import (
 	"strings"
 	"time"
 
+	html "html/template"
+
 	"github.com/partner4it/sftp"
 	"github.com/partner4it/template"
 )
 
 func main() {
 	initVars()
+
+	//Some handy extra functions for template engine
+	customFuncs := html.FuncMap{
+		"toTime": func(timeStamp string) time.Time {
+			t, err := time.Parse("2006-01-02T15:04:05.999999", timeStamp)
+			if err != nil {
+				log.Println(err)
+			}
+			return t
+		},
+	}
 
 	//Print some log information, like version, build and configfile used
 	log.Println(BaseName, "v"+Version+"-"+BuildVersion)
@@ -51,8 +64,8 @@ func main() {
 	if localFile != "" {
 		log.Println("Using localFile", localFile)
 		//Run the conversion
-		if err := template.XMLtoPDF(localFile, config.OutputDir+fileNameWithoutExt(localFile)+".pdf",
-			config.TplName, config.TempFile); err != nil {
+		if err := template.XMLtoPdfFunc(localFile, config.OutputDir+fileNameWithoutExt(localFile)+".pdf",
+			config.TplName, config.TempFile, customFuncs); err != nil {
 			fatalln("Failed to convert file ("+localFile+")", err)
 		}
 		removeTempFile()
@@ -73,8 +86,8 @@ func main() {
 		}
 
 		//Run the conversion
-		if err := template.XMLtoPDF(pipeFile, pipeFile,
-			config.TplName, config.TempFile); err != nil {
+		if err := template.XMLtoPdfFunc(pipeFile, pipeFile,
+			config.TplName, config.TempFile, customFuncs); err != nil {
 			fatalln("Failed to convert file ("+localFile+")", err)
 		}
 		removeTempFile()
@@ -194,8 +207,8 @@ func main() {
 			}
 
 			//Run the conversion on the tempfile
-			if err := template.XMLtoPDF(config.TempFile, config.OutputDir+fileNameWithoutExt(remoteFile)+".pdf",
-				config.TplName, config.TempFile); err != nil {
+			if err := template.XMLtoPdfFunc(config.TempFile, config.OutputDir+fileNameWithoutExt(remoteFile)+".pdf",
+				config.TplName, config.TempFile, customFuncs); err != nil {
 				fatalln("Failed to convert file ("+remoteFile+")", err)
 			}
 			log.Println("Created PDF", config.OutputDir+fileNameWithoutExt(remoteFile)+".pdf")
