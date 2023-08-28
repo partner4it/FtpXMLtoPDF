@@ -82,7 +82,20 @@ func initVars() {
 	//Overwrite the SecretKey used within Secure
 	secure.SecretKey = SecretKey
 	//Check if the is a config file with settings
-	flag.StringVar(&configFile, "configFile", configFile, "The configFile to use.")
+
+	//Because whe have to load the configfile before flags is finish we need to parse it by manually
+	for i := 1; i < len(os.Args); i++ {
+		if os.Args[i] == "-configFile" && i+1 < len(os.Args) {
+			configFile = os.Args[i+1]
+			break
+		}
+		if strings.HasPrefix(os.Args[i], "-configFile=") {
+			configFile = strings.TrimPrefix(os.Args[i], "-configFile=")
+			break
+		}
+	}
+
+	//Load the config file if exists
 	if _, err := os.Stat(configFile); !os.IsNotExist(err) {
 		//There is a config file read it
 		content, err := ioutil.ReadFile(configFile)
@@ -103,10 +116,16 @@ func initVars() {
 
 	// flags declaration using flag package
 	version := flag.Bool("version", false, "prints current version ("+Version+")")
+	flag.StringVar(&configFile, "configFile", configFile, "The configFile to use.")
 	flag.StringVar(&config.FtpServer, "ftpServer", config.FtpServer, "The ftpServer to connect to.")
 	flag.StringVar(&config.FtpUser, "ftpUser", config.FtpUser, "The User used during connecting to the ftpServer.")
-	flag.StringVar(&config.FtpPassword, "ftpPassword", config.FtpPassword, "The Password used during connecting to the ftpServer.")
-	flag.StringVar(&config.FtpDir, "ftpDir", config.FtpDir, "The Directory changed to on the ftpServer after valid login.")
+	//Prevent that password is shown during default parameters
+	var pwdValue string = ""
+	if config.FtpPassword != "" {
+		pwdValue = "******"
+	}
+	pwd := flag.String("ftpPassword", pwdValue, "The password used during connecting to the ftpServer.")
+	flag.StringVar(&config.FtpDir, "ftpDir", config.FtpDir, "The directory changed to on the ftpServer after valid login.")
 	flag.BoolVar(&config.FtpTLS, "ftpTLS", config.FtpTLS, "Should we use standard ftp server with TLS")
 	flag.BoolVar(&config.FtpRemove, "ftpRemove", config.FtpRemove, "Should we remove file after succesfull processing")
 	flag.StringVar(&config.FtpFilter, "ftpFilter", config.FtpFilter, "The filter to select xml files")
@@ -120,9 +139,12 @@ func initVars() {
 	flag.BoolVar(&keepTemp, "keepTemp", keepTemp, "When set we will keep the tempfile")
 	flag.BoolVar(&remoteReset, "remoteReset", remoteReset, "Should we do a remote reset of the configfile")
 	flag.BoolVar(&silent, "silent", silent, "When set en logFile is empty we will not show any logging")
-	flag.StringVar(&config.BrowserPath, "browser", config.BrowserPath, "The full path to the chrome exceutalbe")
+	flag.StringVar(&config.BrowserPath, "browser", config.BrowserPath, "The full path to the chrome or edge exceutalbe")
 
-	flag.Parse() // after declaring flags we need to call it
+	flag.Parse()          // after declaring flags we need to call it
+	if *pwd != pwdValue { //Check if password changed
+		config.FtpPassword = *pwd
+	}
 	if *version {
 		fmt.Println("Version v"+Version, ", Build:", BuildVersion)
 		os.Exit(0)
