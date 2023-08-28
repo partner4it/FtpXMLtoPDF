@@ -3,7 +3,7 @@ module ftpxmltopdf
 go 1.18
 
 require (
-	github.com/chromedp/cdproto v0.0.0-20230816033919-17ee49f3eb4f
+	github.com/chromedp/cdproto v0.0.0-20230828023241-f357fd93b5d6
 	github.com/grokify/html-strip-tags-go v0.0.1
 	github.com/partner4it/secure v0.0.2
 )
@@ -26,7 +26,7 @@ require (
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/partner4it/sftp v0.0.2
-	github.com/partner4it/template v0.0.4
+	github.com/partner4it/template v0.0.5
 	github.com/pkg/sftp v1.13.6
 	github.com/secsy/goftp v0.0.0-20200609142545-aa2de14babf4
 )

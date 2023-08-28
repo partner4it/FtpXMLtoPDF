@@ -68,7 +68,7 @@ func main() {
 	if localFile != "" {
 		log.Println("Using localFile", localFile)
 		//Run the conversion
-		if err := template.XMLtoPdfFunc(localFile, config.OutputDir+fileNameWithoutExt(localFile)+".pdf",
+		if err := template.XmlToPdfFunc(localFile, config.OutputDir+fileNameWithoutExt(localFile)+".pdf",
 			config.TplName, config.TempFile, customFuncs); err != nil {
 			fatalln("Failed to convert file ("+localFile+")", err)
 		}
@@ -90,7 +90,7 @@ func main() {
 		}
 
 		//Run the conversion
-		if err := template.XMLtoPdfFunc(pipeFile, pipeFile,
+		if err := template.XmlToPdfFunc(pipeFile, pipeFile,
 			config.TplName, config.TempFile, customFuncs); err != nil {
 			fatalln("Failed to convert file ("+localFile+")", err)
 		}
@@ -211,7 +211,7 @@ func main() {
 			}
 
 			//Run the conversion on the tempfile
-			if err := template.XMLtoPdfFunc(config.TempFile, config.OutputDir+fileNameWithoutExt(remoteFile)+".pdf",
+			if err := template.XmlToPdfFunc(config.TempFile, config.OutputDir+fileNameWithoutExt(remoteFile)+".pdf",
 				config.TplName, config.TempFile, customFuncs); err != nil {
 				fatalln("Failed to convert file ("+remoteFile+")", err)
 			}

@@ -1,5 +1,5 @@
 # FtpXMLtoPDF
-Download a XML file from a FTP(TLS) or SFTP(over SSH) server and convert it to PDF using a HTML template engine.
+Download a XML file from a FTP(TLS) or SFTP(over SSH) server and convert it to PDF using a HTML template engine. It depends on a locally install Chrome base browser (Chrome/Edge/...) to create from a HTML file a PDF. It defaults to Chrome, if this not installed used the **-browser=** to set the location of the browser to use.
 
 ## Using the tool
 You can download the native exceutable ``ftpxmltopdf`` using the [latest release](https://github.com/partner4it/FtpXMLtoPDF/releases/latest) archive and unziping it on you local system. This archive includes a demo template to inspire you.
@@ -76,7 +76,7 @@ Installation on windows can be sometimes a little bit more tricky. If you follow
 1. Open the command line by typing `cmd` in the search field, and clik the application shown or just hit enter.
 2. You will now in the home directory of your personal settings on your pc. Type `mkdir ftpxmltopdf` to create an new direcotry. 
 3. Change into the newly created directory by typing `cd ftpxmltopdf`
-4. Now you can download the executable by `curl -O -L https://github.com/partner4it/FtpXMLtoPDF/releases/download/v0.0.7/ftpxmltopdf.exe-windows-amd64.gz`
+4. Now you can download the executable by `curl -O -L https://github.com/partner4it/FtpXMLtoPDF/releases/latest/download/ftpxmltopdf.exe-windows-amd64.gz`
 5. Now you can extract the binary by typing `tar -xjf ftpxmltopdf.exe-windows-amd64.gz`
 6. Remove te downloaded archive by typing `del ftpxmltopdf.exe-windows-amd64.gz`
 7. By typing `cd ftpxmltopdf` you will enter the directory of the executable
