@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -85,7 +84,7 @@ func main() {
 			fatalln(err)
 		}
 		var pipeFile = "." + BaseName + ".pip"
-		if err = ioutil.WriteFile(pipeFile, stdin, 0644); err != nil {
+		if err = os.WriteFile(pipeFile, stdin, 0644); err != nil {
 			fatalln(err)
 		}
 
@@ -96,7 +95,7 @@ func main() {
 		}
 		removeTempFile()
 		//Dump the PDF to the console
-		pdf, err := ioutil.ReadFile(pipeFile)
+		pdf, err := os.ReadFile(pipeFile)
 		if err != nil {
 			fatalln(err)
 		}
@@ -158,7 +157,7 @@ func main() {
 			}
 		} else {
 			defer cf.Close()
-			content, err := ioutil.ReadAll(cf)
+			content, err := io.ReadAll(cf)
 			if err != nil {
 				fatalln(err)
 			}
@@ -201,11 +200,11 @@ func main() {
 			}
 			log.Println("Downloaded new xmlfile", remoteFile)
 			defer df.Close()
-			content, err := ioutil.ReadAll(df)
+			content, err := io.ReadAll(df)
 			if err != nil {
 				fatalln(err)
 			}
-			err = ioutil.WriteFile(config.TempFile, content, 0644)
+			err = os.WriteFile(config.TempFile, content, 0644)
 			if err != nil {
 				fatalln(err)
 			}
