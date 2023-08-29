@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -14,7 +13,7 @@ import (
 	"github.com/partner4it/secure"
 )
 
-//Struct definition of the local configfile
+// Struct definition of the local configfile
 type ConfigSettings struct {
 	FtpServer   string `json:"ftpServer"`
 	FtpUser     string `json:"ftpUser"`
@@ -30,54 +29,54 @@ type ConfigSettings struct {
 	LogFile     string `json:"logFile"`
 }
 
-//Struct definition of the remote configfile
+// Struct definition of the remote configfile
 type RemoteConfig struct {
 	LastProcessed time.Time `json:"lastProcessed"`
 }
 
-//The local config
+// The local config
 var config = ConfigSettings{"", "", "", "", false, "*.xml", false,
 	BaseName + ".tpl.html", "", "." + BaseName + ".tmp.html", "", ""}
 
-//The remote config
+// The remote config
 var remoteConfig = RemoteConfig{}
 
-//The module version, will be replaced during build
+// The module version, will be replaced during build
 var Version string = "code"
 
-//The build version, will be replaced during build
+// The build version, will be replaced during build
 var BuildVersion string = "local"
 
-//The base name of all default files used
+// The base name of all default files used
 var BaseName = "ftpxmltopdf"
 
-//The default local configFile
+// The default local configFile
 var configFile string = "." + BaseName + ".cfg"
 
-//Should we ignore faults
+// Should we ignore faults
 var ignoreFlag = false
 
-//Should we keep the temp file
+// Should we keep the temp file
 var keepTemp = false
 
-//Should we do a remote reset of the config file
+// Should we do a remote reset of the config file
 var remoteReset = false
 
-//Should we save the settings
+// Should we save the settings
 var saveFlag = false
 
-//Should we just run conversion test for template
+// Should we just run conversion test for template
 var localFile = ""
 
-//PipeMode will allow a localFile to be read using a commandline pipe
+// PipeMode will allow a localFile to be read using a commandline pipe
 var pipeMode = false
 
-//The name of the log file to use
+// The name of the log file to use
 var silent = false //When set en logfile is empty we will not show any logging
 
 var SecretKey string = "N1PCdw3M2B1TfJhoaY2mL736p2vCUc47"
 
-//Read os flags and setup log file
+// Read os flags and setup log file
 func initVars() {
 	//Overwrite the SecretKey used within Secure
 	secure.SecretKey = SecretKey
@@ -98,7 +97,7 @@ func initVars() {
 	//Load the config file if exists
 	if _, err := os.Stat(configFile); !os.IsNotExist(err) {
 		//There is a config file read it
-		content, err := ioutil.ReadFile(configFile)
+		content, err := os.ReadFile(configFile)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -160,7 +159,7 @@ func initVars() {
 		if err != nil {
 			fatalln(err)
 		}
-		err = ioutil.WriteFile(configFile, []byte(contentStr), 0644)
+		err = os.WriteFile(configFile, []byte(contentStr), 0644)
 		if err != nil {
 			fatalln(err)
 		}
@@ -190,7 +189,7 @@ func initVars() {
 	}
 }
 
-//fatalln error handing with user response
+// fatalln error handing with user response
 func fatalln(v ...any) {
 	if !ignoreFlag {
 		log.Println(v...)
@@ -201,12 +200,12 @@ func fatalln(v ...any) {
 	log.Fatalln(v...)
 }
 
-//Get filename only
+// Get filename only
 func fileNameWithoutExt(fileName string) string {
 	return strings.TrimSuffix(filepath.Base(fileName), filepath.Ext(fileName))
 }
 
-//Remove a file in nice way when exits
+// Remove a file in nice way when exits
 func removeFile(filename string) {
 	if _, err := os.Stat(filename); !os.IsNotExist(err) {
 		err = os.Remove(filename)
@@ -216,7 +215,7 @@ func removeFile(filename string) {
 	}
 }
 
-//Remove the tempfile if exists
+// Remove the tempfile if exists
 func removeTempFile() {
 	removeFile(config.TempFile)
 }
