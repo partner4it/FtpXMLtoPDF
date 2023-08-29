@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -176,10 +177,9 @@ func initVars() {
 	}
 
 	//Check if we should write log logfile instead of console
-	if config.LogFile == "" && (silent || pipeMode) {
-		config.LogFile = "/dev/null"
-	}
-	if config.LogFile != "" {
+	if silent || pipeMode {
+		log.SetOutput(io.Discard)
+	} else if config.LogFile != "" { //Write to file instead of console
 		f, err := os.OpenFile(config.LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 		if err != nil {
 			log.Fatalf("error opening logfile: %v", err)
