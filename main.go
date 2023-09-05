@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"time"
 
@@ -27,6 +28,23 @@ func main() {
 				log.Println(err)
 			}
 			return t
+		},
+		"asRange": func(v any) any {
+			//Incase of nil return empty array
+			if v == nil {
+				return make([]any, 0)
+			}
+			//Incase of array return the array
+			if reflect.TypeOf(v).Kind() == reflect.Array ||
+				reflect.TypeOf(v).Kind() == reflect.Slice ||
+				reflect.TypeOf(v).Kind() == reflect.Map {
+				return v
+			}
+			//In all othercase wrap de element in an array
+			log.Println("As Array", reflect.TypeOf(v).Kind(), v)
+			r := make([]any, 1)
+			r[0] = v
+			return r
 		},
 	}
 
