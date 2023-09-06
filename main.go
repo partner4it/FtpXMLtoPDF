@@ -36,15 +36,55 @@ func main() {
 			}
 			//Incase of array return the array
 			if reflect.TypeOf(v).Kind() == reflect.Array ||
-				reflect.TypeOf(v).Kind() == reflect.Slice ||
-				reflect.TypeOf(v).Kind() == reflect.Map {
+				reflect.TypeOf(v).Kind() == reflect.Slice {
 				return v
 			}
 			//In all othercase wrap de element in an array
-			log.Println("As Array", reflect.TypeOf(v).Kind(), v)
 			r := make([]any, 1)
 			r[0] = v
 			return r
+		},
+		"iif": func(c any, t any, f any) any {
+			if r, ok := c.(bool); ok {
+				if r {
+					return t
+				} else {
+					return f
+				}
+			}
+			if r, ok := c.(string); ok {
+				if r != "" {
+					return t
+				} else {
+					return f
+				}
+			}
+			if r, ok := c.(int); ok {
+				if r != 0 {
+					return t
+				} else {
+					return f
+				}
+			}
+			if r, ok := c.(float32); ok {
+				if r != 0 {
+					return t
+				} else {
+					return f
+				}
+			}
+			if r, ok := c.(float64); ok {
+				if r != 0 {
+					return t
+				} else {
+					return f
+				}
+			}
+			if c != nil {
+				return t
+			} else {
+				return f
+			}
 		},
 	}
 

@@ -191,14 +191,14 @@
                 <td colspan=1 class="element">Verzoek:</td>
                 <td colspan=2 class="result">{{$verzoek.naam}}</td>
                 <td colspan=1 class="element">Id:</td>
-
+                <td colspan=2 class="result"></td>
             </tr>
             <tr>
                 <td colspan="6" class="spacer">&nbsp;</td>
             </tr>
             <tr>
                 <td colspan=1 class="element">Type:</td>
-                <td colspan=2 class="result">{{$verzoek.type}}</td>
+                <td colspan=5 class="result">{{$verzoek.type}}</td>
             </tr>
             <tr>
                 <td colspan=1 class="element">Verzoeknummer:</td>
@@ -241,19 +241,19 @@
             </tr>
             <tr>
                 <td colspan=1 class="element">Straatnaam:</td>
-                <td colspan=2 class="result">{{$verzoek.contactpersoon.contactadres.binnenlandsAdres.straatnaam}}</td>
+                <td colspan=5 class="result">{{$verzoek.contactpersoon.contactadres.binnenlandsAdres.straatnaam}}</td>
             </tr>
             <tr>
                 <td colspan=1 class="element">huisnummer:</td>
-                <td colspan=2 class="result">{{$verzoek.contactpersoon.contactadres.binnenlandsAdres.huisnummer}}</td>
+                <td colspan=5 class="result">{{$verzoek.contactpersoon.contactadres.binnenlandsAdres.huisnummer}}</td>
             </tr>
             <tr>
                 <td colspan=1 class="element">Postcode:</td>
-                <td colspan=2 class="result">{{$verzoek.contactpersoon.contactadres.binnenlandsAdres.postcode}}</td>
+                <td colspan=5 class="result">{{$verzoek.contactpersoon.contactadres.binnenlandsAdres.postcode}}</td>
             </tr>
             <tr>
                 <td colspan=1 class="element">Woonplaats:</td>
-                <td colspan=2 class="result">{{$verzoek.contactpersoon.contactadres.binnenlandsAdres.woonplaatsnaam}}
+                <td colspan=5 class="result">{{$verzoek.contactpersoon.contactadres.binnenlandsAdres.woonplaatsnaam}}
                 </td>
             </tr>
             <tr>
@@ -275,27 +275,26 @@
                     {{$verzoek.initiatiefnemer.natuurlijkPersoon.voorvoegselNaamgebruik}}
                     {{$verzoek.initiatiefnemer.natuurlijkPersoon.geslachtsnaamNaamgebruik}}</td>
                 <td colspan=1 class="element">BSN:</td>
-                <td colspan=1 class="result">{{$verzoek.initiatiefnemer.natuurlijkPersoon.burgerservicenummer}}</td>
-            </tr>
+                <td colspan=2 class="result">{{$verzoek.initiatiefnemer.natuurlijkPersoon.burgerservicenummer}}</td>
             </tr>
             <tr>
                 <td colspan=1 class="element">Straatnaam:</td>
-                <td colspan=2 class="result">{{$verzoek.initiatiefnemer.natuurlijkPersoon.verblijfsadres.straatnaam}}
+                <td colspan=5 class="result">{{$verzoek.initiatiefnemer.natuurlijkPersoon.verblijfsadres.straatnaam}}
                 </td>
             </tr>
             <tr>
                 <td colspan=1 class="element">huisnummer:</td>
-                <td colspan=2 class="result">{{$verzoek.initiatiefnemer.natuurlijkPersoon.verblijfsadres.huisnummer}}
+                <td colspan=5 class="result">{{$verzoek.initiatiefnemer.natuurlijkPersoon.verblijfsadres.huisnummer}}
                 </td>
             </tr>
             <tr>
                 <td colspan=1 class="element">Postcode:</td>
-                <td colspan=2 class="result">{{$verzoek.initiatiefnemer.natuurlijkPersoon.verblijfsadres.postcode}}
+                <td colspan=5 class="result">{{$verzoek.initiatiefnemer.natuurlijkPersoon.verblijfsadres.postcode}}
                 </td>
             </tr>
             <tr>
                 <td colspan=1 class="element">Woonplaats:</td>
-                <td colspan=2 class="result">
+                <td colspan=5 class="result">
                     {{$verzoek.initiatiefnemer.natuurlijkPersoon.verblijfsadres.woonplaatsnaam}}</td>
             </tr>
             <!-- Conditional end NPS {{end }}
@@ -336,139 +335,149 @@
                 {{end }}
             -->
 
-            <!-- Condtional If bezoekadres
-                   {{if $verzoek.initiatiefnemer.nietNatuurlijkPersoon.bezoekadres}}
+                <!-- Condtional If bezoekadres
+                    {{if $verzoek.initiatiefnemer.nietNatuurlijkPersoon.bezoekadres}}
+                -->
+                </tr>
+                <td colspan="6" class="groupspacer">Bezoekadres</td>
+                </tr>
+                <tr>
+                    <td colspan=1 class="element">Straatnaam:</td>
+                    <td colspan=2 class="result">{{$verzoek.initiatiefnemer.nietNatuurlijkPersoon.bezoekAdres.straatnaam}}
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan=1 class="element">huisnummer:</td>
+                    <td colspan=2 class="result">{{$verzoek.initiatiefnemer.nietNatuurlijkPersoon.bezoekAdres.huisnummer}}
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan=1 class="element">Postcode:</td>
+                    <td colspan=2 class="result">{{$verzoek.initiatiefnemer.nietNatuurlijkPersoon.bezoekAdres.postcode}}
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan=1 class="element">Woonplaats:</td>
+                    <td colspan=2 class="result">
+                        {{$verzoek.initiatiefnemer.nietNatuurlijkPersoon.bezoekAdres.woonplaatsnaam}}</td>
+                </tr>
+
+                <!-- Conditional end bezoekadres 
+                    {{end }}
+                -->
+
+                <!-- Condtional If vestigingadres
+                    {{if $verzoek.initiatiefnemer.nietNatuurlijkPersoon.vestiging}}
+                -->
+                <tr>
+                    <td colspan="6" class="groupspacer">Vestigingsadres</td>
+                </tr>
+                <tr>
+                    <td colspan=1 class="element">Straatnaam:</td>
+                    <td colspan=2 class="result">
+                        {{$verzoek.initiatiefnemer.nietNatuurlijkPersoon.vestiging.locatieAdresVestiging.straatnaam}}</td>
+                    <td colspan=1 class="element">adresBuitenland1:</td>
+                    <td colspan=2 class="result">
+                        {{$verzoek.initiatiefnemer.nietNatuurlijkPersoon.vestiging.locatieAdresBuitenland.adresBuitenland1}}
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan=1 class="element">huisnummer:</td>
+                    <td colspan=2 class="result">
+                        {{$verzoek.initiatiefnemer.nietNatuurlijkPersoon.vestiging.locatieAdresVestiging.huisnummer}}</td>
+                    <td colspan=1 class="element">adresBuitenland2:</td>
+                    <td colspan=2 class="result">
+                        {{$verzoek.initiatiefnemer.nietNatuurlijkPersoon.vestiging.locatieAdresBuitenland.adresBuitenland2}}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td colspan=1 class="element">Postcode:</td>
+                    <td colspan=2 class="result">
+                        {{$verzoek.initiatiefnemer.nietNatuurlijkPersoon.vestiging.locatieAdresVestiging.postcode}}</td>
+                    <td colspan=1 class="element">adresBuitenland3:</td>
+                    <td colspan=2 class="result">
+                        {{$verzoek.initiatiefnemer.nietNatuurlijkPersoon.vestiging.locatieAdresBuitenland.adresBuitenland3}}
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan=1 class="element">Woonplaats:</td>
+                    <td colspan=2 class="result">
+                        {{$verzoek.initiatiefnemer.nietNatuurlijkPersoon.vestiging.locatieAdresVestiging.woonplaatsnaam}}
+                    </td>
+                    <td colspan=1 class="element">Land:</td>
+                    <td colspan=2 class="result">
+                        {{$verzoek.initiatiefnemer.nietNatuurlijkPersoon.vestiging.locatieAdresBuitenland.land}}</td>
+                </tr>
+
+                <!-- Conditional end vestigingadres {{end }}
             -->
-            </tr>
-            <td colspan="6" class="groupspacer">Bezoekadres</td>
-            </tr>
-            <tr>
-                <td colspan=1 class="element">Straatnaam:</td>
-                <td colspan=2 class="result">{{$verzoek.initiatiefnemer.nietNatuurlijkPersoon.bezoekAdres.straatnaam}}
-                </td>
-            </tr>
-            <tr>
-                <td colspan=1 class="element">huisnummer:</td>
-                <td colspan=2 class="result">{{$verzoek.initiatiefnemer.nietNatuurlijkPersoon.bezoekAdres.huisnummer}}
-                </td>
-            </tr>
-            <tr>
-                <td colspan=1 class="element">Postcode:</td>
-                <td colspan=2 class="result">{{$verzoek.initiatiefnemer.nietNatuurlijkPersoon.bezoekAdres.postcode}}
-                </td>
-            </tr>
-            <tr>
-                <td colspan=1 class="element">Woonplaats:</td>
-                <td colspan=2 class="result">
-                    {{$verzoek.initiatiefnemer.nietNatuurlijkPersoon.bezoekAdres.woonplaatsnaam}}</td>
-            </tr>
-
-            <!-- Conditional end bezoekadres 
-                {{end }}
-            -->
-
-            <!-- Condtional If vestigingadres
-                {{if $verzoek.initiatiefnemer.nietNatuurlijkPersoon.vestiging}}
-            -->
-            <tr>
-                <td colspan="6" class="groupspacer">Vestigingsadres</td>
-            </tr>
-            <tr>
-                <td colspan=1 class="element">Straatnaam:</td>
-                <td colspan=2 class="result">
-                    {{$verzoek.initiatiefnemer.nietNatuurlijkPersoon.vestiging.locatieAdresVestiging.straatnaam}}</td>
-                <td colspan=1 class="element">adresBuitenland1:</td>
-                <td colspan=2 class="result">
-                    {{$verzoek.initiatiefnemer.nietNatuurlijkPersoon.vestiging.locatieAdresBuitenland.adresBuitenland1}}
-                </td>
-            </tr>
-            <tr>
-                <td colspan=1 class="element">huisnummer:</td>
-                <td colspan=2 class="result">
-                    {{$verzoek.initiatiefnemer.nietNatuurlijkPersoon.vestiging.locatieAdresVestiging.huisnummer}}</td>
-                <td colspan=1 class="element">adresBuitenland2:</td>
-                <td colspan=2 class="result">
-                    {{$verzoek.initiatiefnemer.nietNatuurlijkPersoon.vestiging.locatieAdresBuitenland.adresBuitenland2}}
-                </td>
-            </tr>
-
-            <tr>
-                <td colspan=1 class="element">Postcode:</td>
-                <td colspan=2 class="result">
-                    {{$verzoek.initiatiefnemer.nietNatuurlijkPersoon.vestiging.locatieAdresVestiging.postcode}}</td>
-                <td colspan=1 class="element">adresBuitenland3:</td>
-                <td colspan=2 class="result">
-                    {{$verzoek.initiatiefnemer.nietNatuurlijkPersoon.vestiging.locatieAdresBuitenland.adresBuitenland3}}
-                </td>
-            </tr>
-            <tr>
-                <td colspan=1 class="element">Woonplaats:</td>
-                <td colspan=2 class="result">
-                    {{$verzoek.initiatiefnemer.nietNatuurlijkPersoon.vestiging.locatieAdresVestiging.woonplaatsnaam}}
-                </td>
-                <td colspan=1 class="element">Land:</td>
-                <td colspan=2 class="result">
-                    {{$verzoek.initiatiefnemer.nietNatuurlijkPersoon.vestiging.locatieAdresBuitenland.land}}</td>
-            </tr>
-
-            <!-- Conditional end vestigingadres {{end }}
-          -->
 
 
             <!-- Conditional end NNP {{end }}
             -->
+
+            <!-- Condtional If Projectlocaties
+                    {{if $verzoek.projectlocaties.projectlocatie }}
+                -->
             <tr>
                 <td colspan="6" class="spacer">&nbsp;</td>
             </tr>
             <tr>
                 <td colspan="6" class="groupspacer">Projectlocaties</td>
             </tr>
-            <tr>
-                <td colspan=1 class="element">identificatiecodeNummeraanduiding:</td>
-                <td colspan=2 class="result">
-                    {{$verzoek.projectlocaties.projectlocatie.adresaanduiding.identificatiecodeNummeraanduiding}}</td>
-            </tr>
-            <tr>
-                <td colspan=1 class="element">opgegevenAdresStraatnaam:</td>
-                <td colspan=2 class="result">
-                    {{$verzoek.projectlocaties.projectlocatie.adresaanduiding.opgegevenAdresStraatnaam}}</td>
-            </tr>
-            <tr>
-                <td colspan=1 class="element">opgegevenAdresHuisnummer:</td>
-                <td colspan=2 class="result">
-                    {{$verzoek.projectlocaties.projectlocatie.adresaanduiding.opgegevenAdresHuisnummer}}</td>
-            </tr>
-            <tr>
-                <td colspan=1 class="element">opgegevenAdresPostcode:</td>
-                <td colspan=2 class="result">
-                    {{$verzoek.projectlocaties.projectlocatie.adresaanduiding.opgegevenAdresPostcode}}</td>
-            </tr>
-            <tr>
-                <td colspan=1 class="element">opgegevenAdresWoonplaatsNaam:</td>
-                <td colspan=2 class="result">
-                    {{$verzoek.projectlocaties.projectlocatie.adresaanduiding.opgegevenAdresWoonplaatsNaam}}</td>
-            </tr>
+             <!-- Loop Projectlocaties
+                    {{range asRange $verzoek.projectlocaties.projectlocatie}}
+             -->
+                <tr>
+                    <td colspan=1 class="element">identificatiecodeNummeraanduiding:</td>
+                    <td colspan=5 class="result">
+                        {{.adresaanduiding.identificatiecodeNummeraanduiding}}</td>
+                </tr>
+                <tr>
+                    <td colspan=1 class="element">opgegevenAdresStraatnaam:</td>
+                    <td colspan=5 class="result">
+                        {{.adresaanduiding.opgegevenAdresStraatnaam}}</td>
+                </tr>
+                <tr>
+                    <td colspan=1 class="element">opgegevenAdresHuisnummer:</td>
+                    <td colspan=5 class="result">
+                        {{.adresaanduiding.opgegevenAdresHuisnummer}}</td>
+                </tr>
+                <tr>
+                    <td colspan=1 class="element">opgegevenAdresPostcode:</td>
+                    <td colspan=5 class="result">
+                        {{.adresaanduiding.opgegevenAdresPostcode}}</td>
+                </tr>
+                <tr>
+                    <td colspan=1 class="element">opgegevenAdresWoonplaatsNaam:</td>
+                    <td colspan=5 class="result">
+                        {{.adresaanduiding.opgegevenAdresWoonplaatsNaam}}</td>
+                </tr>
 
-            <tr>
-                <td colspan="6" class="spacer">&nbsp;</td>
-            </tr>
+                <tr>
+                    <td colspan="6" class="spacer">&nbsp;</td>
+                </tr>
+            <!-- Conditional & range end Projectlocatie {{end}}
+                {{end}}
+            -->
 
-            <tr>
-                <td colspan="6" class="groupspacer">Specificaties</td>
-            </tr>
 
             <!--
             We will now loop through all projectactiviteiten
             {{range asRange $verzoek.projectactiviteiten.projectactiviteit }}
             {{$activiteit:= .}}
             -->
+            <tr>
+                <td colspan="6" class="groupspacer">Specificaties</td>
+            </tr>
             <!--
             We will now loop through all specifications
             {{range asRange .specificaties.specificatie}}
             -->
             <tr>
                 <td colspan=1 class="element">activiteit:</td>
-                <td colspan=2 class="result">{{$activiteit.activiteitnaam}}</td>
+                <td colspan=5 class="result">{{$activiteit.activiteitnaam}}</td>
             </tr>
 
 
